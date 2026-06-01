@@ -1834,6 +1834,29 @@ class GameEngine {
     }
   }
 
+  launchFirework(startX, startY, targetX, targetY, color, delayMs) {
+    setTimeout(() => {
+      // Spawn a rocket particle that shoots upwards!
+      const climbTime = (startY - targetY) / 7;
+      this.particles.push({
+        type: 'firework_rocket',
+        x: startX,
+        y: startY,
+        targetX: targetX,
+        targetY: targetY,
+        vy: -7, // fast upward velocity
+        vx: (targetX - startX) / climbTime, // calculate exact vx to reach targetX
+        alpha: 1.0,
+        size: 3.5,
+        color: color,
+        trailTimer: 0
+      });
+      
+      // Play a soft whistling launch tone!
+      this.playTone(180, 'sine', 0.4, 0.06, 520); // sweeps from 180Hz to 520Hz!
+    }, delayMs);
+  }
+
   updateAndDrawParticles() {
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
@@ -1927,6 +1950,48 @@ class GameEngine {
         this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         this.ctx.fill();
         this.ctx.restore();
+      } else if (p.type === 'firework_rocket') {
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        // Spawn trailing sparks as it climbs!
+        p.trailTimer++;
+        if (p.trailTimer % 2 === 0) {
+          this.particles.push({
+            type: 'firework_spark',
+            x: p.x,
+            y: p.y,
+            vx: (Math.random() - 0.5) * 0.8,
+            vy: 1 + Math.random() * 1.5, // trailing down
+            alpha: 0.7,
+            size: 1.0 + Math.random() * 1.2,
+            color: '#ffd700', // golden spark trail
+            decay: 0.04,
+            gravity: 0.05
+          });
+        }
+        
+        // Draw the glowing rocket head
+        this.ctx.save();
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.shadowColor = p.color;
+        this.ctx.shadowBlur = 12;
+        this.ctx.beginPath();
+        this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.restore();
+        
+        // Check if reached target height (peak)
+        if (p.y <= p.targetY || p.vy >= 0) {
+          // Detonate! Remove rocket
+          this.particles.splice(i, 1);
+          this.spawnFirework(p.x, p.y, p.color);
+          
+          // Detonation sound!
+          this.playTone(300 + Math.random() * 150, 'sine', 0.25, 0.16); // nice low pop sound
+          this.playTone(140, 'triangle', 0.35, 0.18); // low boom
+          continue;
+        }
       }
     }
   }
@@ -2310,13 +2375,9 @@ class GameEngine {
         this.spawnConfettiParticles(p.x, p.y);
         
         // Trigger a spectacular 3-shell firework show in the sky above Taiwan!
-        this.spawnFirework(710, 110, '#ff2a7a'); // Cyber Pink shell
-        setTimeout(() => {
-          this.spawnFirework(660, 150, '#00f0ff'); // Cyber Blue shell
-        }, 180);
-        setTimeout(() => {
-          this.spawnFirework(760, 130, '#ffd700'); // Cyber Gold shell
-        }, 360);
+        this.launchFirework(p.x, p.y, 710, 110, '#ff2a7a', 0);    // Cyber Pink climbing rocket
+        this.launchFirework(p.x, p.y, 660, 150, '#00f0ff', 180);  // Cyber Blue climbing rocket
+        this.launchFirework(p.x, p.y, 760, 130, '#ffd700', 360);  // Cyber Gold climbing rocket
         
         this.playSuccessSound();
         this.saveData();
