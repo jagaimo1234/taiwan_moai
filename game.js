@@ -560,7 +560,7 @@ class GameEngine {
 
       // Check hit on glasses (2016 boat fishing easter egg!)
       const glassesDist = Math.hypot(this.seaFloorGlasses.x - clickX, this.seaFloorGlasses.y - clickY);
-      if (glassesDist < 25) {
+      if (glassesDist < 35) {
         const gl = this.seaFloorGlasses;
         gl.wiggleTime = Math.PI * 3;
         const glassesComments = [
@@ -667,7 +667,7 @@ class GameEngine {
 
       // Check hit on glasses (2016 boat fishing easter egg!)
       const glassesDist = Math.hypot(this.seaFloorGlasses.x - clickX, this.seaFloorGlasses.y - clickY);
-      if (glassesDist < 25) {
+      if (glassesDist < 35) {
         const gl = this.seaFloorGlasses;
         gl.wiggleTime = Math.PI * 3;
         const glassesComments = [
@@ -2531,7 +2531,7 @@ class GameEngine {
       if (gl.wiggleTime < 0) gl.wiggleTime = 0;
     }
     
-    ctx.font = '26px sans-serif';
+    ctx.font = '38px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText("👓", 0, 0);
