@@ -1814,6 +1814,26 @@ class GameEngine {
     }
   }
 
+  spawnFirework(originX, originY, color) {
+    // Gorgeous expanding firework shell sparks
+    for (let i = 0; i < 48; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 2 + Math.random() * 5.5;
+      this.particles.push({
+        type: 'firework_spark',
+        x: originX,
+        y: originY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        alpha: 1.0,
+        size: 2.0 + Math.random() * 2.5,
+        color: color,
+        decay: 0.015 + Math.random() * 0.015,
+        gravity: 0.06 // slight gravity drift
+      });
+    }
+  }
+
   updateAndDrawParticles() {
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
@@ -1882,6 +1902,31 @@ class GameEngine {
           this.ctx.fill();
         }
         this.ctx.globalAlpha = 1.0;
+      } else if (p.type === 'firework_spark') {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.vx *= 0.96; // air resistance
+        p.vy *= 0.96;
+        p.alpha -= p.decay;
+        
+        if (p.alpha <= 0) {
+          this.particles.splice(i, 1);
+          continue;
+        }
+        
+        this.ctx.save();
+        this.ctx.globalAlpha = p.alpha;
+        this.ctx.fillStyle = p.color;
+        
+        // Beautiful glowing core
+        this.ctx.shadowColor = p.color;
+        this.ctx.shadowBlur = 10;
+        
+        this.ctx.beginPath();
+        this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.restore();
       }
     }
   }
@@ -2263,6 +2308,16 @@ class GameEngine {
         }
         
         this.spawnConfettiParticles(p.x, p.y);
+        
+        // Trigger a spectacular 3-shell firework show in the sky above Taiwan!
+        this.spawnFirework(710, 110, '#ff2a7a'); // Cyber Pink shell
+        setTimeout(() => {
+          this.spawnFirework(660, 150, '#00f0ff'); // Cyber Blue shell
+        }, 180);
+        setTimeout(() => {
+          this.spawnFirework(760, 130, '#ffd700'); // Cyber Gold shell
+        }, 360);
+        
         this.playSuccessSound();
         this.saveData();
       } else {
