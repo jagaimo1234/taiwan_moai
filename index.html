@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>モアイ特急便！ - Moai Express to Taiwan</title>
+  <meta name="description" content="金沢モア太郎のモアイを絶妙な力加減で投げて、日本から台湾へ届けよう！Pinkoiコラボレーション特別ゲーム。">
+  <!-- Google Fonts: Outfit (English UI), Noto Sans JP (Japanese), Noto Sans TC (Traditional Chinese) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=2.1">
+</head>
+<body>
+  <!-- Background Glows -->
+  <div class="glow-bg glow-1"></div>
+  <div class="glow-bg glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <span class="logo-sub">Kanazawa Moataro Presents</span>
+        <h1 class="logo-title">MOAI EXPRESS <span>TO TAIWAN</span></h1>
+      </div>
+      <div class="score-board">
+        <div class="score-card">
+          <span class="score-label">SCORE</span>
+          <span id="score-val" class="score-number">0</span>
+        </div>
+        <div class="score-card high-score">
+          <span class="score-label">HIGH SCORE</span>
+          <span id="high-score-val" class="score-number">0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Game Section -->
+    <main class="game-layout">
+      <!-- Game Screen (Canvas Container) -->
+      <section class="game-screen-wrapper">
+        <div class="canvas-container">
+          <canvas id="game-canvas" width="900" height="450"></canvas>
+
+          <!-- Sound Toggle Button -->
+          <button id="sound-toggle" class="icon-btn sound-on" title="ミュート切替">
+            <span class="icon">🔊</span>
+          </button>
+
+          <!-- Peek Sea Button -->
+          <button id="btn-peek-sea" class="peek-sea-btn" title="海の底をのぞく">
+            <span class="icon">🌊</span>
+            <span class="btn-text">海の底をのぞく</span>
+          </button>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="controls-panel">
+          <div class="power-bar-wrapper">
+            <span class="power-label">CHARGE POWER</span>
+            <div class="power-bar-container">
+              <div id="power-fill" class="power-bar-fill"></div>
+              <div class="target-marker" style="left: 70%;" title="目標エリア目安">🎯 Target</div>
+            </div>
+          </div>
+          
+          <!-- Large prominent button inside Controls panel -->
+          <button id="btn-peek-sea-controls" class="peek-sea-btn-controls" title="海の底をのぞく">
+            <span class="icon">🌊</span>
+            <span>海の底をのぞく</span>
+          </button>
+
+          <button id="btn-throw" class="throw-btn">
+            <span class="throw-btn-content">
+              <span class="btn-primary-text">HOLD & RELEASE</span>
+              <span class="btn-sub-text">長押しでチャージ、離して発射！</span>
+            </span>
+            <span class="btn-glow-layer"></span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Description and Collection Sidebar -->
+      <aside class="sidebar-layout">
+        <div class="about-card glass-panel">
+          <h3>金沢モア太郎 × Pinkoi</h3>
+          <p>石川県金沢市から、癒やしと笑顔を届けるモアイアート作品。台湾最大級のデザイナーズマーケット<strong>「Pinkoi」</strong>でついに公式展開開始！</p>
+          <p class="accent-text">モアイを台湾に無事着地させると、特別なモアイコレクションがアンロックされます。全種類コンプリートを目指しましょう！</p>
+          <a href="https://jp.pinkoi.com" target="_blank" rel="noopener noreferrer" class="pinkoi-shop-btn">
+            <span>Pinkoi公式ショップを見る</span>
+            <span class="arrow">→</span>
+          </a>
+        </div>
+
+        <div class="gallery-card glass-panel">
+          <div class="gallery-header">
+            <h3>モアイコレクション</h3>
+            <span id="collection-count" class="badge">0 / 6</span>
+          </div>
+          <div id="collection-grid" class="collection-grid">
+            <!-- Items generated via JS -->
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Success Modal PopUp -->
+    <div id="success-modal" class="modal-overlay">
+      <div class="modal-content glass-panel">
+        <div class="modal-header">
+          <div class="badge success-badge">✨ PERFECT LANDING!</div>
+          <h2>台湾への着地に大成功！</h2>
+        </div>
+        <div class="modal-body">
+          <div class="unlocked-card">
+            <div class="unlocked-image-container">
+              <div id="unlocked-emoji" class="unlocked-emoji">🗿</div>
+              <div class="sparkles-container">
+                <div class="sparkle sp-1">✦</div>
+                <div class="sparkle sp-2">✦</div>
+                <div class="sparkle sp-3">✦</div>
+              </div>
+            </div>
+            <div class="unlocked-info">
+              <span class="unlocked-status">NEW COLLECTION UNLOCKED</span>
+              <h3 id="unlocked-title">黄金の招福モアイ</h3>
+              <p id="unlocked-desc">持っているだけで金運と幸福を招くと言い伝えられる、まばゆく輝く黄金のモアイ。台湾での個展に向けて制作された限定品。</p>
+            </div>
+          </div>
+          <p class="modal-promo-text">このモアイ作品はPinkoiで実際に購入・予約することができます！</p>
+        </div>
+        <div class="modal-actions">
+          <a id="pinkoi-item-link" href="https://jp.pinkoi.com" target="_blank" rel="noopener noreferrer" class="pinkoi-action-btn">
+            <span>Pinkoiで作品詳細を見る</span>
+          </a>
+          <button id="btn-close-modal" class="primary-btn">次のモアイを投げる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sea Floor Modal -->
+    <div id="sea-floor-modal" class="modal-overlay">
+      <div class="modal-content glass-panel" style="max-width: 600px;">
+        <div class="modal-header">
+          <div class="badge success-badge" style="background: rgba(0, 240, 255, 0.1) !important; border-color: rgba(0, 240, 255, 0.3) !important; color: var(--cyber-blue) !important; font-family: var(--font-display);">🌊 DEEP OCEAN BED</div>
+          <h2>東シナ海の海底探査</h2>
+        </div>
+        <div class="modal-body" style="align-items: center; display: flex; flex-direction: column; gap: 16px;">
+          <p id="sea-floor-status" class="modal-promo-text" style="color: var(--text-muted); font-size: 13px;">
+            あなたが海に落としてしまったモアイたちの末路...
+          </p>
+          <div class="sea-floor-canvas-container" style="width: 100%; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden; border: 2px solid var(--border-glass); background: #050d22;">
+            <canvas id="sea-floor-canvas" width="560" height="280" style="width: 100%; height: 100%; display: block;"></canvas>
+          </div>
+          <span id="sunken-count-badge" class="badge" style="font-size: 12px; padding: 6px 14px; background: rgba(255, 42, 122, 0.1); border-color: rgba(255, 42, 122, 0.3); color: var(--cyber-pink); font-family: var(--font-display);">
+            沈んだモアイ: 0 基
+          </span>
+        </div>
+        <div class="modal-actions">
+          <button id="btn-close-sea-floor" class="primary-btn" style="background: linear-gradient(135deg, var(--cyber-pink) 0%, #d4145a 100%); box-shadow: var(--shadow-neon-pink); color: #fff; width: 100%;">海面に戻る</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div id="tutorial-overlay" class="overlay-screen active">
+      <div class="tutorial-content">
+        <h2>モアイを台湾へ届けよう！</h2>
+        <p>ボタンを長押ししてパワーをチャージし、タイミングよく離してモアイを投げてください。</p>
+        <div class="tutorial-visual">
+          <div class="key-cap">SPACE</div>
+          <span>または</span>
+          <button class="mock-btn">投げるボタン長押し</button>
+        </div>
+        <ul class="tutorial-tips">
+          <li>🔴 チャージが<strong>短い</strong>：海に落ちて沈んでしまいます...</li>
+          <li>🟡 チャージが<strong>長い</strong>：台湾を通り越して宇宙へ飛んでいきます...</li>
+          <li>🟢 <strong>絶妙な加減</strong>で、輝く台湾島に着地させましょう！</li>
+        </ul>
+        <button id="btn-start" class="primary-btn pulse-glow">ゲームスタート！</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer-bar">
+      <p>© 2026 kanazawa Moataro & Pinkoi Moai Promotion Campaign. Created with Antigravity.</p>
+    </footer>
+  </div>
+
+  <script src="game.js?v=3.13"></script>
+</body>
+</html>
